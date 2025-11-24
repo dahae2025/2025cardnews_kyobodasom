@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 슬라이드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #ffffff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 1 / 1;
+            background: #fff;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .slider-container {
+                max-width: 100%;
+                border-radius: 4px;
+            }
+
+            .arrow {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .arrow.left {
+                left: 10px;
+            }
+
+            .arrow.right {
+                right: 10px;
+            }
+
+            .counter {
+                bottom: 15px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .arrow {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+
+            .arrow.left {
+                left: 8px;
+            }
+
+            .arrow.right {
+                right: 8px;
+            }
+        }
+
+        .slider-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .slides-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .arrow.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .arrow:hover {
+            background: rgba(0, 0, 0, 0.6);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .arrow.left {
+            left: 20px;
+        }
+
+        .arrow.right {
+            right: 20px;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="slider-container">
+        <div class="slider-wrapper" id="sliderWrapper">
+            <div class="slides-container" id="slidesContainer">
+                <div class="slide">
+                    <img src="https://i.imgur.com/sRBYiis.jpeg" alt="Image 1">
+                </div>
+                <div class="slide">
+                    <img src="https://i.imgur.com/O9hFoMB.jpeg" alt="Image 2">
+                </div>
+                <div class="slide">
+                    <img src="https://i.imgur.com/C2idMhl.jpeg" alt="Image 3">
+                </div>
+                <div class="slide">
+                    <img src="https://i.imgur.com/78nAVRH.jpeg" alt="Image 4">
+                </div>
+                <div class="slide">
+                    <img src="https://i.imgur.com/GU4GDtN.jpeg" alt="Image 5">
+                </div>
+                <div class="slide">
+                    <img src="https://i.imgur.com/84buDzW.jpeg" alt="Image 6">
+                </div>
+                <div class="slide">
+                    <img src="https://i.imgur.com/9qf8fSM.jpeg" alt="Image 7">
+                </div>
+                <div class="slide">
+                    <img src="https://i.imgur.com/gooXbHy.jpeg" alt="Image 8">
+                </div>
+                <div class="slide">
+                    <img src="https://i.imgur.com/XGAxZiY.jpeg" alt="Image 9">
+                </div>
+            </div>
+        </div>
+
+        <button class="arrow left" id="prevBtn">‹</button>
+        <button class="arrow right" id="nextBtn">›</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        let showControls = false;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const sliderWrapper = document.getElementById('sliderWrapper');
+        const slidesContainer = document.getElementById('slidesContainer');
+
+        function updateSlide() {
+            slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+            updateButtons();
+        }
+
+        function updateButtons() {
+            if (!showControls) return;
+
+            // 첫 번째 슬라이드에서는 이전 버튼 숨김
+            if (currentSlide === 0) {
+                prevBtn.classList.remove('show');
+            } else {
+                prevBtn.classList.add('show');
+            }
+
+            // 마지막 슬라이드에서는 다음 버튼 숨김
+            if (currentSlide === totalSlides - 1) {
+                nextBtn.classList.remove('show');
+            } else {
+                nextBtn.classList.add('show');
+            }
+        }
+
+        function showButtons() {
+            showControls = true;
+            updateButtons();
+        }
+
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        });
+
+        sliderWrapper.addEventListener('click', () => {
+            if (!showControls) {
+                showButtons();
+            } else {
+                hideButtons();
+            }
+        });
+
+        function hideButtons() {
+            showControls = false;
+            prevBtn.classList.remove('show');
+            nextBtn.classList.remove('show');
+        }
+
+        // 키보드 화살표 키 지원
+        document.addEventListener('keydown', (e) => {
+            if (!showControls) return;
+            
+            if (e.key === 'ArrowLeft' && currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            } else if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        });
+
+        // 초기 상태 설정
+        updateSlide();
+    </script>
+</body>
+</html>
