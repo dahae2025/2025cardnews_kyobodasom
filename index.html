@@ -16,7 +16,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #fff;
+            background: #ffffff;
             font-family: Arial, sans-serif;
             padding: 0;
             margin: 0;
@@ -227,7 +227,8 @@
 
     <script>
         let currentSlide = 0;
-        let showControls = false;
+        let showControls = true;
+        let hideTimeout;
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
         const prevBtn = document.getElementById('prevBtn');
@@ -241,32 +242,42 @@
         }
 
         function updateButtons() {
-            if (!showControls) {
-                // 첫 화면에서는 오른쪽 화살표만 보이기
-                if (currentSlide === 0) {
-                    nextBtn.classList.add('show');
-                }
-                return;
-            }
-
             // 첫 번째 슬라이드에서는 이전 버튼 숨김
             if (currentSlide === 0) {
                 prevBtn.classList.remove('show');
             } else {
-                prevBtn.classList.add('show');
+                if (showControls) {
+                    prevBtn.classList.add('show');
+                }
             }
 
             // 마지막 슬라이드에서는 다음 버튼 숨김
             if (currentSlide === totalSlides - 1) {
                 nextBtn.classList.remove('show');
             } else {
-                nextBtn.classList.add('show');
+                if (showControls) {
+                    nextBtn.classList.add('show');
+                }
             }
         }
 
         function showButtons() {
             showControls = true;
             updateButtons();
+            resetHideTimer();
+        }
+
+        function hideButtons() {
+            showControls = false;
+            prevBtn.classList.remove('show');
+            nextBtn.classList.remove('show');
+        }
+
+        function resetHideTimer() {
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                hideButtons();
+            }, 1000); // 1초 후 자동 숨김
         }
 
         prevBtn.addEventListener('click', (e) => {
@@ -275,6 +286,7 @@
             if (currentSlide > 0) {
                 currentSlide--;
                 updateSlide();
+                showButtons();
             }
         });
 
@@ -284,6 +296,7 @@
             if (currentSlide < totalSlides - 1) {
                 currentSlide++;
                 updateSlide();
+                showButtons();
             }
         });
 
@@ -293,6 +306,7 @@
             if (currentSlide > 0) {
                 currentSlide--;
                 updateSlide();
+                showButtons();
             }
         });
 
@@ -302,22 +316,26 @@
             if (currentSlide < totalSlides - 1) {
                 currentSlide++;
                 updateSlide();
-            }
-        });
-
-        sliderWrapper.addEventListener('click', () => {
-            if (!showControls) {
                 showButtons();
-            } else {
-                hideButtons();
             }
         });
 
-        function hideButtons() {
-            showControls = false;
-            prevBtn.classList.remove('show');
-            nextBtn.classList.remove('show');
-        }
+        // 마우스 움직임 감지
+        sliderWrapper.addEventListener('mousemove', () => {
+            showButtons();
+        });
+
+        // 터치 감지
+        sliderWrapper.addEventListener('touchstart', () => {
+            showButtons();
+        }, { passive: true });
+
+        sliderWrapper.addEventListener('click', (e) => {
+            // 화살표 버튼이 아닌 경우에만 타이머 리셋
+            if (e.target === sliderWrapper || e.target.closest('.slide')) {
+                showButtons();
+            }
+        });
 
         // 드래그/스와이프 기능
         let startX = 0;
@@ -392,7 +410,7 @@
 
         // 초기 상태 설정
         updateSlide();
+        resetHideTimer(); // 3초 후 화살표 자동 숨김 시작
     </script>
 </body>
 </html>
-
