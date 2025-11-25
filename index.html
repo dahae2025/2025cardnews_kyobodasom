@@ -16,7 +16,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #ffffff;
+            background: #fff;
             font-family: Arial, sans-serif;
             padding: 0;
             margin: 0;
@@ -241,7 +241,13 @@
         }
 
         function updateButtons() {
-            if (!showControls) return;
+            if (!showControls) {
+                // 첫 화면에서는 오른쪽 화살표만 보이기
+                if (currentSlide === 0) {
+                    nextBtn.classList.add('show');
+                }
+                return;
+            }
 
             // 첫 번째 슬라이드에서는 이전 버튼 숨김
             if (currentSlide === 0) {
@@ -313,6 +319,64 @@
             nextBtn.classList.remove('show');
         }
 
+        // 드래그/스와이프 기능
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        let startTransform = 0;
+
+        sliderWrapper.addEventListener('mousedown', handleDragStart);
+        sliderWrapper.addEventListener('touchstart', handleDragStart, { passive: true });
+        
+        sliderWrapper.addEventListener('mousemove', handleDragMove);
+        sliderWrapper.addEventListener('touchmove', handleDragMove, { passive: false });
+        
+        sliderWrapper.addEventListener('mouseup', handleDragEnd);
+        sliderWrapper.addEventListener('touchend', handleDragEnd);
+        sliderWrapper.addEventListener('mouseleave', handleDragEnd);
+
+        function handleDragStart(e) {
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            startTransform = currentSlide * 100;
+            slidesContainer.style.transition = 'none';
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            const diff = currentX - startX;
+            const percentMove = (diff / sliderWrapper.offsetWidth) * 100;
+            
+            slidesContainer.style.transform = `translateX(-${startTransform - percentMove}%)`;
+        }
+
+        function handleDragEnd(e) {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            slidesContainer.style.transition = 'transform 0.5s ease-in-out';
+            
+            const diff = currentX - startX;
+            const threshold = sliderWrapper.offsetWidth * 0.2; // 20% 이동 시 슬라이드 변경
+            
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0 && currentSlide > 0) {
+                    // 오른쪽으로 드래그 (이전 슬라이드)
+                    currentSlide--;
+                } else if (diff < 0 && currentSlide < totalSlides - 1) {
+                    // 왼쪽으로 드래그 (다음 슬라이드)
+                    currentSlide++;
+                }
+            }
+            
+            updateSlide();
+            startX = 0;
+            currentX = 0;
+        }
+
         // 키보드 화살표 키 지원
         document.addEventListener('keydown', (e) => {
             if (!showControls) return;
@@ -331,5 +395,4 @@
     </script>
 </body>
 </html>
-
 
